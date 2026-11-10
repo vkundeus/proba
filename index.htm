@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Інтерактивний тренажер — складні обчислення та аналіз даних</title>
+<style>
+:root{--ink:#182338;--muted:#617087;--blue:#2857c5;--cyan:#eaf3ff;--green:#16845b;--red:#bd3d45;--gold:#f2b544;--line:#dbe3ef}
+*{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{background:linear-gradient(120deg,#182d59,#2857c5);color:white;padding:28px max(18px,calc((100% - 1080px)/2))}
+header h1{font-size:clamp(24px,4vw,36px);line-height:1.15;margin:8px 0}header p{max-width:780px;color:#e2ebff;margin:8px 0}
+main{max-width:1080px;margin:22px auto;padding:0 16px}.panel,.task{background:white;border:1px solid var(--line);border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 4px 16px #19345a0b}
+h2{margin:0 0 10px;font-size:22px}h3{margin:4px 0 8px;font-size:18px}.muted,.hint{color:var(--muted)}.hint{font-size:14px}
+input,select,button{font:inherit;border-radius:10px;padding:10px 12px;border:1px solid #c9d4e4}input{max-width:100%}button{background:var(--blue);color:white;border:0;cursor:pointer;font-weight:650}button.secondary{background:#eaf0fb;color:#20385f}button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.row label{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.progress{height:10px;background:#e5ebf5;border-radius:20px;overflow:hidden;margin:12px 0}.progress>div{height:100%;background:linear-gradient(90deg,#24a276,#2b62d0);width:0;transition:.25s}
+.pill{display:inline-block;background:#edf3ff;color:#244a9e;border-radius:30px;padding:4px 10px;font-size:13px;font-weight:700}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.draggable{border:1px dashed #8ca6d2;background:#f7faff;border-radius:12px;padding:12px;cursor:grab;user-select:none}.draggable:active{cursor:grabbing}.zones{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:14px}.zone{border:2px dashed #b9c7dc;border-radius:12px;min-height:125px;padding:12px;background:#fbfcff}.zone.over{background:#eaf3ff;border-color:var(--blue)}.zone strong{display:block;margin-bottom:8px}.placed{display:block;background:#e9f1ff;border-radius:8px;margin:6px 0;padding:7px;font-size:14px}
+.feedback{margin-top:10px;padding:10px 12px;border-radius:10px;background:#f0f5fb}.ok{color:var(--green);font-weight:700}.bad{color:var(--red);font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:9px;border-bottom:1px solid var(--line);text-align:left}th{background:#f2f6fc}
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}.metric{background:#f2f7ff;border-radius:12px;padding:14px}.metric b{font-size:23px;display:block}.metric small{color:var(--muted)}
+input[type=range]{width:100%;padding:0}.bar{height:12px;background:#e6edf7;border-radius:20px;overflow:hidden}.bar span{display:block;height:100%;background:#2a66ca}
+.question{padding:12px;border:1px solid var(--line);border-radius:12px;margin:10px 0}.question label{display:block;margin:6px 0}
+footer{max-width:1080px;margin:20px auto;padding:0 16px 40px;color:var(--muted);font-size:13px}
+@media print{body{background:white}.no-print,header .hint{display:none!important}.panel,.task{box-shadow:none;break-inside:avoid}.report-only{display:block!important}main{max-width:none}}
+</style></head>
+<body>
+<header><span class="pill">ІНФОРМАТИКА · інтерактивний практикум</span>
+<h1>Програмні засоби для складних обчислень, аналізу даних та фінансових розрахунків</h1>
+<p>Мінілабораторія: обирай інструменти, перетягуй картки, досліджуй дані й моделюй фінансові рішення. Кожна перевірка та проміжний результат потрапляють до журналу спроб.</p>
+</header>
+<main>
+<section class="panel no-print">
+<h2>Паспорт роботи</h2><div class="row"><label>Учень/учениця <input id="student" placeholder="Прізвище та ім’я"></label><label>Клас <input id="class" placeholder="Напр., 10-А" style="width:110px"></label><label>Дата <input id="date" type="date"></label></div>
+<div class="progress"><div id="progress"></div></div><div class="row"><span id="progressText" class="muted">Виконано завдань: 0 із 5</span><span id="score" class="pill">Бали: 0</span><span id="attempts" class="pill">Спроби: 0</span></div>
+<p class="hint">Порада: працюй послідовно. Можна повторювати завдання — система фіксує кожну спробу, а не лише правильну відповідь.</p>
+</section>
+
+<section class="task" id="t1"><span class="pill">Завдання 1 · drag & drop</span><h2>Обери правильний програмний інструмент</h2>
+<p>Перетягни картки до відповідних ситуацій. На телефоні можна натиснути картку, а потім потрібну категорію.</p>
+<div class="cards" id="tools">
+<div class="draggable" draggable="true" data-id="spread">📊 Табличний процесор (Excel / Google Sheets)</div>
+<div class="draggable" draggable="true" data-id="stats">📈 Статистичний пакет (SPSS / R)</div>
+<div class="draggable" draggable="true" data-id="math">🧮 Система комп’ютерної математики (GeoGebra / Mathcad)</div>
+<div class="draggable" draggable="true" data-id="db">🗃️ Система керування базами даних (Access / SQLite)</div>
+</div>
+<div class="zones">
+<div class="zone" data-accept="spread"><strong>А. Розрахувати бюджет, використати формули та побудувати діаграму</strong></div>
+<div class="zone" data-accept="stats"><strong>Б. Перевірити гіпотезу на великій вибірці, виконати статистичний аналіз</strong></div>
+<div class="zone" data-accept="math"><strong>В. Дослідити складну математичну модель і залежність змінних</strong></div>
+<div class="zone" data-accept="db"><strong>Г. Зберігати, шукати й пов’язувати записи про клієнтів</strong></div>
+</div><div class="row" style="margin-top:12px"><button onclick="checkDrag()">Перевірити розподіл</button><button class="secondary" onclick="resetDrag()">Скинути</button></div><div id="fb1" class="feedback" aria-live="polite">Розклади всі чотири картки.</div>
+</section>
+
+<section class="task" id="t2"><span class="pill">Завдання 2 · формули</span><h2>Формульний конструктор</h2>
+<p>У таблиці магазину: B2 — ціна товару, C2 — кількість, D2 — сума. Обери формулу, яка правильно обчислить суму.</p>
+<div class="question"><b>Яка формула має бути в D2?</b>
+<label><input type="radio" name="formula" value="a"> =B2+C2</label><label><input type="radio" name="formula" value="b"> =B2*C2</label><label><input type="radio" name="formula" value="c"> =SUM(B2:C2)</label></div>
+<p>Тепер спрогнозуй: якщо B2 = 125 грн, а C2 = 4, яким буде результат?</p><input id="formulaResult" type="number" placeholder="Введи суму, грн">
+<button onclick="checkFormula()">Перевірити</button><div id="fb2" class="feedback">Пояснення з’явиться після перевірки.</div>
+</section>
+
+<section class="task" id="t3"><span class="pill">Завдання 3 · симуляція</span><h2>Фінансова лабораторія: депозит і складні відсотки</h2>
+<p>Змоделюй накопичення. Змінюй параметри й спостерігай, як змінюється кінцева сума. Це навчальна модель, не банківська пропозиція.</p>
+<div class="calc">
+<div><label>Початковий внесок: <b id="pval">10 000</b> грн</label><input id="principal" type="range" min="1000" max="50000" step="500" value="10000"></div>
+<div><label>Річна ставка: <b id="rval">8</b>%</label><input id="rate" type="range" min="1" max="20" step=".5" value="8"></div>
+<div><label>Тривалість: <b id="yval">3</b> роки</label><input id="years" type="range" min="1" max="10" step="1" value="3"></div>
+<div><label>Капіталізація</label><select id="freq"><option value="1">1 раз на рік</option><option value="4">Щокварталу</option><option value="12" selected>Щомісяця</option></select></div>
+</div>
+<div class="calc" style="margin-top:14px">
+<div class="metric"><small>Підсумкова сума</small><b id="total">—</b><small>грн</small></div>
+<div class="metric"><small>Нараховані відсотки</small><b id="interest">—</b><small>грн</small></div>
+<div class="metric"><small>Без капіталізації</small><b id="simple">—</b><small>грн · прості відсотки</small></div>
+</div><div style="margin:14px 0"><b>Зростання суми за роками</b><div id="growth"></div></div>
+<div class="question"><b>Питання для дослідження</b><p>Що найбільше вплинуло на результат у твоєму експерименті?</p><select id="insight"><option value="">Обери висновок</option><option value="principal">Розмір початкового внеску</option><option value="rate">Річна ставка</option><option value="years">Тривалість заощадження</option><option value="freq">Частота капіталізації</option></select></div>
+<button onclick="saveSimulation()">Зафіксувати проміжний результат</button><div id="fb3" class="feedback">Зміни параметри та зафіксуй результат.</div>
+</section>
+
+<section class="task" id="t4"><span class="pill">Завдання 4 · аналіз даних</span><h2>Аналітик: знайди закономірність</h2>
+<p>Дані про кількість проданих одиниць товару за 5 днів. Визнач загальну кількість і день із найбільшим продажем.</p>
+<table><thead><tr><th>День</th><th>Пн</th><th>Вт</th><th>Ср</th><th>Чт</th><th>Пт</th></tr></thead><tbody><tr><th>Продажі</th><td>12</td><td>18</td><td>15</td><td>25</td><td>20</td></tr></tbody></table>
+<div class="calc" style="margin-top:12px"><label>Разом за 5 днів <input id="sumSales" type="number" placeholder="Кількість"></label><label>Найбільше продажів <select id="maxDay"><option value="">Обери день</option><option>Пн</option><option>Вт</option><option>Ср</option><option>Чт</option><option>Пт</option></select></label></div>
+<button onclick="checkData()">Перевірити аналіз</button><div id="fb4" class="feedback">Підказка: для суми в електронній таблиці використовують функцію SUM.</div>
+<div class="metric" style="margin-top:12px"><small>Мінідіаграма продажів</small><div id="chart"></div></div>
+</section>
+
+<section class="task" id="t5"><span class="pill">Завдання 5 · підсумковий виклик</span><h2>Місія «Розумний бюджет класної події»</h2>
+<p>Клас планує подію для 24 учасників. Обери правильні твердження, а потім сформулюй висновок.</p>
+<div class="question"><label><input type="checkbox" id="q51"> Електронна таблиця допоможе автоматично перерахувати бюджет після зміни кількості учасників.</label>
+<label><input type="checkbox" id="q52"> Діаграма може допомогти порівняти частки витрат.</label>
+<label><input type="checkbox" id="q53"> Для будь-яких фінансових розрахунків достатньо текстового редактора.</label>
+<label><input type="checkbox" id="q54"> Формули та функції зменшують кількість ручних обчислень.</label></div>
+<label>Короткий висновок учня/учениці<br><textarea id="conclusion" rows="3" style="width:100%;margin-top:6px" placeholder="Наприклад: для бюджету зручно використати..."></textarea></label>
+<button onclick="checkMission()">Завершити місію</button><div id="fb5" class="feedback">Познач правильні твердження й напиши висновок.</div>
+</section>
+
+<section class="panel"><h2>Журнал спроб і проміжних результатів</h2><p class="hint">Тут відображаються перевірки, повторні спроби, параметри фінансової моделі та відповіді. Перед завершенням внеси ім’я учня/учениці.</p>
+<div id="log"><p class="muted">Поки що спроб не зафіксовано.</p></div>
+<div class="row no-print"><button onclick="exportPDF()">Завантажити звіт у PDF</button><button class="secondary" onclick="exportCSV()">Завантажити журнал CSV</button><button class="secondary" onclick="resetAll()">Почати заново</button></div>
+<p class="hint no-print">PDF створюється через вікно друку браузера: у списку принтерів обери «Зберегти як PDF». У звіт потрапляють дані учня, бали, кількість спроб і журнал проміжних результатів.</p>
+<div id="printReport" class="report-only" style="display:none"></div>
+</section>
+</main><footer>Навчальний тренажер для уроку інформатики. Фінансова симуляція використовує формулу складних відсотків: S = P(1 + r/n)^(nt). Значення умовні та призначені для навчання.</footer>
+<script>
+const log=[],done=new Set();let points=0,tries=0,selected=null;
+const $=id=>document.getElementById(id);
+function record(task,result,earned=0){tries++;points+=earned;log.push({time:new Date().toLocaleString('uk-UA'),task,result,earned});renderLog();updateProgress()}
+function renderLog(){$('log').innerHTML=log.length?'<table><thead><tr><th>Час</th><th>Завдання / спроба</th><th>Проміжний результат</th><th>Бали</th></tr></thead><tbody>'+log.map(x=>`<tr><td>${x.time}</td><td>${x.task}</td><td>${x.result}</td><td>${x.earned}</td></tr>`).join('')+'</tbody></table>':'<p class="muted">Поки що спроб не зафіксовано.</p>'}
+function updateProgress(){$('progress').style.width=(done.size/5*100)+'%';$('progressText').textContent=`Виконано завдань: ${done.size} із 5`;$('score').textContent='Бали: '+points;$('attempts').textContent='Спроби: '+tries}
+function mark(n){done.add(n);updateProgress()}
+function dragSetup(){document.querySelectorAll('.draggable').forEach(el=>{el.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',el.dataset.id);selected=el.dataset.id}) ;el.addEventListener('click',()=>{selected=el.dataset.id;document.querySelectorAll('.draggable').forEach(x=>x.style.outline='');el.style.outline='3px solid #2b62d0'})});document.querySelectorAll('.zone').forEach(z=>{z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('over')});z.addEventListener('dragleave',()=>z.classList.remove('over'));z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('over');place(e.dataTransfer.getData('text/plain'),z) });z.addEventListener('click',()=>{if(selected){place(selected,z);selected=null;document.querySelectorAll('.draggable').forEach(x=>x.style.outline='')}})})}
+function place(id,z){const el=document.querySelector(`[data-id="${id}"]`);if(!el)return;z.querySelectorAll('.placed').forEach(p=>{if(p.dataset.id===id)p.remove()});const p=document.createElement('span');p.className='placed';p.dataset.id=id;p.textContent=el.textContent;z.appendChild(p)}
+function checkDrag(){let right=0,total=0;document.querySelectorAll('.zone').forEach(z=>{const p=z.querySelector('.placed');if(p){total++;if(p.dataset.id===z.dataset.accept)right++}});const ok=right===4;$('fb1').innerHTML=`Розміщено ${total}/4. Правильно: ${right}/4. ${ok?'<span class="ok">Чудово! Усі інструменти на своїх місцях.</span>':'<span class="bad">Є помилки. Подумай, яке завдання найкраще виконує кожен інструмент.</span>'}`;record('1. Вибір програмного засобу',`Правильно ${right}/4; розміщено ${total}/4`,ok?3:0);if(ok)mark(1)}
+function resetDrag(){document.querySelectorAll('.placed').forEach(x=>x.remove());$('fb1').textContent='Розклади всі чотири картки.'}
+function checkFormula(){const f=document.querySelector('input[name="formula"]:checked')?.value;const v=Number($('formulaResult').value);const ok=f==='b'&&v===500;$('fb2').innerHTML=ok?'<span class="ok">Правильно! D2 = B2*C2, отже 125 × 4 = 500 грн.</span>':'<span class="bad">Ще раз: сума — це ціна, помножена на кількість. Перевір також числову відповідь.</span>';record('2. Формули',`Формула: ${f||'не обрано'}; результат: ${v||'не введено'} грн`,ok?2:0);if(ok)mark(2)}
+function calc(){const p=+$('principal').value,r=+$('rate').value/100,y=+$('years').value,n=+$('freq').value;const total=p*Math.pow(1+r/n,n*y),simple=p*(1+r*y);$('pval').textContent=p.toLocaleString('uk-UA');$('rval').textContent=(r*100).toLocaleString('uk-UA');$('yval').textContent=y;$('total').textContent=total.toLocaleString('uk-UA',{maximumFractionDigits:2});$('interest').textContent=(total-p).toLocaleString('uk-UA',{maximumFractionDigits:2});$('simple').textContent=simple.toLocaleString('uk-UA',{maximumFractionDigits:2});$('growth').innerHTML=Array.from({length:y},(_,i)=>{let val=p*Math.pow(1+r/n,n*(i+1));return `<div style="margin:7px 0"><small>Рік ${i+1}: ${val.toLocaleString('uk-UA',{maximumFractionDigits:0})} грн</small><div class="bar"><span style="width:${val/total*100}%"></span></div></div>`}).join('');return {p,r,y,n,total,simple}}
+['principal','rate','years','freq'].forEach(id=>$(id).addEventListener('input',calc));function saveSimulation(){const x=calc(),ins=$('insight').value;const ok=!!ins;$('fb3').innerHTML=`<span class="ok">Збережено проміжний результат.</span> Параметри: ${x.p} грн, ${(x.r*100).toFixed(1)}%, ${x.y} р., капіталізація ${x.n} раз(и)/рік. Висновок: ${ins||'не обрано'}.`;record('3. Фінансова симуляція',`Внесок ${x.p} грн; ставка ${(x.r*100).toFixed(1)}%; ${x.y} р.; n=${x.n}; результат ${x.total.toFixed(2)} грн; висновок: ${ins||'не обрано'}`,ok?2:1);if(ok)mark(3)}
+function checkData(){const s=+$('sumSales').value,d=$('maxDay').value,ok=s===90&&d==='Чт';$('fb4').innerHTML=ok?'<span class="ok">Точно! 12+18+15+25+20 = 90, максимум — четвер (25).</span>':'<span class="bad">Перевір суму всіх значень і знайди найбільше число в рядку.</span>';record('4. Аналіз даних',`Сума: ${s||'не введено'}; максимум: ${d||'не обрано'}`,ok?2:0);if(ok)mark(4)}
+function checkMission(){const vals=[$('q51').checked,$('q52').checked,$('q53').checked,$('q54').checked];const correct=[true,true,false,true];const n=vals.filter((v,i)=>v===correct[i]).length;const ok=n===4&&$('conclusion').value.trim().length>=15;$('fb5').innerHTML=`Результат: ${n}/4 тверджень. ${ok?'<span class="ok">Місію виконано! Висновок записано.</span>':'<span class="bad">Майже! Правильні: 1, 2 і 4; 3 — хибне. Додай змістовний висновок.</span>'}`;record('5. Місія «Розумний бюджет»',`Правильно ${n}/4; висновок: ${$('conclusion').value.trim()||'не написано'}`,ok?3:0);if(ok)mark(5)}
+function reportHTML(){const who=$('student').value.trim()||'Не вказано',cl=$('class').value.trim()||'Не вказано',dt=$('date').value||new Date().toLocaleDateString('uk-UA');return `<h1>Звіт про виконання інтерактивного практикуму</h1><p><b>Тема:</b> Програмні засоби для складних обчислень, аналізу даних та фінансових розрахунків</p><p><b>Учень/учениця:</b> ${who} &nbsp; <b>Клас:</b> ${cl} &nbsp; <b>Дата:</b> ${dt}</p><p><b>Підсумок:</b> ${points} балів; ${done.size}/5 завдань виконано; ${tries} зафіксованих спроб.</p><h2>Журнал спроб і проміжних результатів</h2>${$('log').innerHTML}<h2>Відповідь у підсумковій місії</h2><p>${$('conclusion').value||'Не заповнено'}</p><p>Оцінювання є формувальним: журнал містить усі перевірки, у тому числі повторні спроби.</p>`}
+function exportPDF(){$('printReport').innerHTML=reportHTML();$('printReport').style.display='block';window.print();setTimeout(()=>$('printReport').style.display='none',800)}
+function exportCSV(){const rows=[['Час','Завдання','Проміжний результат','Бали'],...log.map(x=>[x.time,x.task,x.result,x.earned])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(';')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='zhurnal_sprob.csv';a.click();URL.revokeObjectURL(a.href)}
+function resetAll(){if(!confirm('Очистити всі відповіді та журнал?'))return;location.reload()}
+$('date').value=new Date().toISOString().slice(0,10);dragSetup();calc();updateProgress();
+</script></body></html>
